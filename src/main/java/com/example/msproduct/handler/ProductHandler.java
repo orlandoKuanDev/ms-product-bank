@@ -2,9 +2,9 @@ package com.example.msproduct.handler;
 
 import com.example.msproduct.model.entities.Product;
 import com.example.msproduct.services.IProductService;
-import com.example.msproduct.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -16,16 +16,18 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
-
 @Component
 public class ProductHandler {
 
+    private final IProductService productService;
+
     @Autowired
-    private IProductService productService;
+    public ProductHandler(IProductService productService) {
+        this.productService = productService;
+    }
 
     public Mono<ServerResponse> findAll(ServerRequest request){
-        return ServerResponse.ok().contentType(APPLICATION_JSON_UTF8)
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
                 .body(productService.findAll(), Product.class);
     }
 
@@ -33,28 +35,49 @@ public class ProductHandler {
         String id = request.pathVariable("id");
         return errorHandler(
                 productService.findById(id).flatMap(p -> ServerResponse.ok()
-                                .contentType(APPLICATION_JSON_UTF8)
-                                .syncBody(p))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(p))
                         .switchIfEmpty(ServerResponse.notFound().build())
         );
     }
 
     public Mono<ServerResponse> save(ServerRequest request){
-        Mono<Product> bill = request.bodyToMono(Product.class);
-        return bill.flatMap(p-> {
-                    return productService.create(p);
-                }).flatMap(p -> ServerResponse.created(URI.create("/api/client/".concat(p.getId())))
-                        .contentType(APPLICATION_JSON_UTF8)
-                        .syncBody(p))
+        Mono<Product> product = request.bodyToMono(Product.class);
+        return product.flatMap(productService::create)
+                .flatMap(p -> ServerResponse.created(URI.create("/api/client/".concat(p.getId())))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(p))
                 .onErrorResume(error -> {
                     WebClientResponseException errorResponse = (WebClientResponseException) error;
                     if(errorResponse.getStatusCode() == HttpStatus.BAD_REQUEST) {
                         return ServerResponse.badRequest()
-                                .contentType(APPLICATION_JSON_UTF8)
-                                .syncBody(errorResponse.getResponseBodyAsString());
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(errorResponse.getResponseBodyAsString());
                     }
                     return Mono.error(errorResponse);
                 });
+    }
+
+    public Mono<ServerResponse> update(ServerRequest request){
+        Mono<Product> product = request.bodyToMono(Product.class);
+        String id = request.pathVariable("id");
+        return errorHandler(
+                product
+                        .flatMap(p -> {
+                            p.setId(id);
+                            return productService.update(p);
+                        })
+                        .flatMap(p-> ServerResponse.created(URI.create("/api/product/".concat(p.getId())))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(p))
+        );
+    }
+
+    public Mono<ServerResponse> delete(ServerRequest request){
+        String id = request.pathVariable("id");
+        return errorHandler(
+                productService.delete(id).then(ServerResponse.noContent().build())
+        );
     }
 
     private Mono<ServerResponse> errorHandler(Mono<ServerResponse> response){
@@ -65,9 +88,11 @@ public class ProductHandler {
                 body.put("error", "No existe el producto: ".concat(errorResponse.getMessage()));
                 body.put("timestamp", new Date());
                 body.put("status", errorResponse.getStatusCode().value());
-                return ServerResponse.status(HttpStatus.NOT_FOUND).syncBody(body);
+                return ServerResponse.status(HttpStatus.NOT_FOUND).bodyValue(body);
             }
             return Mono.error(errorResponse);
         });
     }
+
+
 }
