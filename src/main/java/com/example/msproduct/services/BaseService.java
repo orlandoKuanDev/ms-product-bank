@@ -4,15 +4,32 @@ import com.example.msproduct.repositories.IRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface BaseService<T, ID> {
-    Mono<T> create(T o);
+public abstract class BaseService <T, ID> implements IBaseService<T, ID> {
 
-    Flux<T> findAll();
+    protected abstract IRepository<T, ID> getRepository();
 
-    Mono<T> findById(ID id);
+    @Override
+    public Mono<T> create(T o) {
+        return getRepository().save(o);
+    }
 
-    Mono<T> update(T o);
+    @Override
+    public Flux<T> findAll() {
+        return getRepository().findAll();
+    }
 
-    Mono<Void> delete(ID id);
+    @Override
+    public Mono<T> findById(ID id) {
+        return getRepository().findById(id);
+    }
 
+    @Override
+    public Mono<T> update(T o) {
+        return getRepository().save(o);
+    }
+
+    @Override
+    public Mono<Void> delete(ID id) {
+        return getRepository().deleteById(id);
+    }
 }

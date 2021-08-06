@@ -1,6 +1,7 @@
 package com.example.msproduct.handler;
 
 import com.example.msproduct.model.entities.Product;
+import com.example.msproduct.services.IProductService;
 import com.example.msproduct.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 public class ProductHandler {
 
     @Autowired
-    private ProductService productService;
+    private IProductService productService;
 
     public Mono<ServerResponse> findAll(ServerRequest request){
         return ServerResponse.ok().contentType(APPLICATION_JSON_UTF8)

@@ -1,39 +1,23 @@
 package com.example.msproduct.services;
 
 import com.example.msproduct.model.entities.Product;
+import com.example.msproduct.repositories.IProductRepository;
+import com.example.msproduct.repositories.IRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-public class ProductService implements IProductService{
+public class ProductService extends BaseService<Product, String> implements IProductService {
 
     @Autowired
-    private IProductService productService;
+    private IProductRepository repository;
 
     @Override
-    public Mono<Product> create(Product o) {
-        return productService.create(o);
+    protected IRepository<Product, String> getRepository() {
+        return repository;
     }
 
-    @Override
-    public Flux<Product> findAll() {
-        return productService.findAll();
-    }
-
-    @Override
-    public Mono<Product> findById(String s) {
-        return productService.findById(s);
-    }
-
-    @Override
-    public Mono<Product> update(Product o) {
-        return productService.update(o);
-    }
-
-    @Override
-    public Mono<Void> delete(String s) {
-        return productService.delete(s);
-    }
 }
+
