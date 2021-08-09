@@ -35,9 +35,9 @@ public class ProductHandler {
     }
 
     public Mono<ServerResponse> findById(ServerRequest request){
-        String id = request.pathVariable("id");
+        String productId = request.pathVariable("productId");
         return errorHandler(
-                productService.findById(id).flatMap(p -> ServerResponse.ok()
+                productService.findById(productId).flatMap(p -> ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue(p))
                         .switchIfEmpty(ServerResponse.notFound().build())

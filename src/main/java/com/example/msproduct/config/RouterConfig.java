@@ -17,11 +17,11 @@ public class RouterConfig {
     @Bean
     public RouterFunction<ServerResponse> rutas(ProductHandler handler){
         return route(GET("/product"), handler::findAll)
-                .andRoute(GET("/product/{id}"), handler::findById)
+                .andRoute(GET("/product/find/{productId}"), handler::findById)
                 .andRoute(POST("/product"), handler::save)
                 .andRoute(PUT("/product/{id}"), handler::update)
                 .andRoute(DELETE("/product/{id}"), handler::delete)
-                .andRoute(DELETE("/product/name/{productName}"), handler::findByProductName);
+                .andRoute(GET("/product/name/{productName}"), handler::findByProductName);
 
     }
 }
