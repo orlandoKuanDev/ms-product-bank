@@ -1,5 +1,6 @@
 package com.example.msproduct.handler;
 
+import com.example.msproduct.exception.ArgumentWebClientNotValid;
 import com.example.msproduct.model.entities.Product;
 import com.example.msproduct.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Component
 public class ProductHandler {
@@ -38,6 +41,18 @@ public class ProductHandler {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue(p))
                         .switchIfEmpty(ServerResponse.notFound().build())
+        );
+    }
+
+    public Mono<ServerResponse> findByProductName(ServerRequest request){
+        String productName = request.pathVariable("productName");
+        return errorHandler(
+                productService.findByProductName(productName).flatMap(p -> ServerResponse.ok()
+                                .contentType(APPLICATION_JSON)
+                                .bodyValue(p))
+                        .switchIfEmpty(Mono.error(new ArgumentWebClientNotValid(
+                                String.format("THE PRODUCT NAME DONT EXIST IN MICRO SERVICE PRODUCT-> %s", productName)
+                        )))
         );
     }
 
@@ -93,6 +108,5 @@ public class ProductHandler {
             return Mono.error(errorResponse);
         });
     }
-
 
 }

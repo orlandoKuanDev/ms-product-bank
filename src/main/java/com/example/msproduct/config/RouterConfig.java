@@ -20,7 +20,8 @@ public class RouterConfig {
                 .andRoute(GET("/product/{id}"), handler::findById)
                 .andRoute(POST("/product"), handler::save)
                 .andRoute(PUT("/product/{id}"), handler::update)
-                .andRoute(DELETE("/product/{id}"), handler::delete);
+                .andRoute(DELETE("/product/{id}"), handler::delete)
+                .andRoute(DELETE("/product/name/{productName}"), handler::findByProductName);
 
     }
 }
