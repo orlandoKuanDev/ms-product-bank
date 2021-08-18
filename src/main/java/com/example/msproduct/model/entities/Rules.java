@@ -3,11 +3,13 @@ package com.example.msproduct.model.entities;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Rules {
 
-    private String customerType;
+    private List<String> customerTypeTarget;
 
     private boolean commissionMaintenance;
 
