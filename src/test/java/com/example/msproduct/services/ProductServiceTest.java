@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
@@ -51,5 +52,14 @@ class ProductServiceTest {
     }
     @Test
     void findByProductName() {
+        Product productRequest = DataProvider.ProductRequest();
+
+        Mockito.when(repository.findById(productRequest.getProductName()))
+                .thenReturn(Mono.just(productRequest));
+
+        Mono<Product> productName = productService.findByProductName(productRequest.getProductName());
+
+        StepVerifier.create(productName)
+                .expectNext(productRequest).verifyComplete();
     }
 }
