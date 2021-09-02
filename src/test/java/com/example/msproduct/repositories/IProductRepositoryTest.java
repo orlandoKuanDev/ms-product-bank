@@ -1,5 +1,6 @@
 package com.example.msproduct.repositories;
 
+import com.example.msproduct.data.DataProvider;
 import com.example.msproduct.model.entities.Product;
 import com.example.msproduct.model.entities.Rules;
 import org.junit.jupiter.api.Test;
@@ -27,17 +28,11 @@ class IProductRepositoryTest {
     }
     @Test
     void ProductRepositoryTest() {
-        List<String> customerTypeTarget = new ArrayList<>();
-        customerTypeTarget.add("PERSONAL");
-        Rules rules = new Rules();
-        rules.setCustomerTypeTarget(customerTypeTarget);
-        rules.setMaximumLimitMonthlyMovementsQuantity(1);
-        rules.setMaximumLimitMonthlyMovements(false);
-        rules.setMaximumLimitCreditPerson(1);
-        rules.setCommissionMaintenance(false);
+        Product productRequest1 = DataProvider.ProductRequest();
+        Product productRequest2 = DataProvider.ProductRequest();
 
         Flux<Product> saved = Flux
-                .just(new Product("1", "CUENTA CORRIENTE", "PASIVO", rules), new Product("2", "AHORRO", "PASIVO", rules))
+                .just(productRequest1,productRequest2)
                 .flatMap(this.reactiveMongoTemplate::save);
 
         Flux<Product> interaction = this.reactiveMongoTemplate
