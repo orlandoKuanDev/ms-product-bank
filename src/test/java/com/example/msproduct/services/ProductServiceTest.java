@@ -28,13 +28,10 @@ class ProductServiceTest {
     @InjectMocks
     private final IProductService productService;
 
-    @InjectMocks
-    private final ProductHandler productHandler;
 
-    ProductServiceTest(IProductRepository repository, IProductService productService, ProductHandler productHandler) {
+    ProductServiceTest(IProductRepository repository, IProductService productService) {
         this.repository = repository;
         this.productService = productService;
-        this.productHandler = productHandler;
     }
 
     @Test
