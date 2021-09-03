@@ -24,8 +24,21 @@ public class DataProvider {
                         .build())
                 .build();
     }
-    private Predicate<Product> findByProducNamePred =
-            product -> ("AHORRO".equals(product.getProductName()));
+    public static Product ProductCreate() {
+        List<String> customerTypeTarget = new ArrayList<>();
+        customerTypeTarget.add("PERSONAL");
+        return Product.builder()
+                .id("1")
+                .productName("CUENTA CORRIENTE")
+                .productType("PASIVO")
+                .rules(Rules.builder()
+                        .customerTypeTarget(customerTypeTarget)
+                        .maximumLimitMonthlyMovementsQuantity(1)
+                        .maximumLimitMonthlyMovements(false)
+                        .commissionMaintenance(false)
+                        .build())
+                .build();
+    }
     public static Product ProductResponse() {
         List<String> customerTypeTarget = new ArrayList<>();
         customerTypeTarget.add("PERSONAL");
