@@ -34,19 +34,10 @@ class ProductServiceTest {
         mockProductService = new ProductService(repository);
     }
 
-
     @Test
     void findByProductName() {
-        List<String> customerTypeTarget = new ArrayList<>();
-        customerTypeTarget.add("PERSONAL");
-        Rules rules = new Rules();
-        rules.setCustomerTypeTarget(customerTypeTarget);
-        rules.setMaximumLimitMonthlyMovementsQuantity(1);
-        rules.setMaximumLimitMonthlyMovements(false);
-        rules.setMaximumLimitCreditPerson(1);
-        rules.setCommissionMaintenance(false);
-
-        Product productRequest = new Product("1", "CUENTA CORRIENTE", "PASIVO", rules);
+        
+        Product productRequest = DataProvider.ProductRequest();
 
         Mockito.when(repository.findByProductName(productRequest.getProductName()))
                 .thenReturn(Mono.just(productRequest));
