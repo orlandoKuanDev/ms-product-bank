@@ -5,6 +5,7 @@ import com.example.msproduct.model.entities.Rules;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class DataProvider {
     public static Product ProductRequest() {
@@ -23,6 +24,8 @@ public class DataProvider {
                         .build())
                 .build();
     }
+    private Predicate<Product> findByProducNamePred =
+            product -> ("AHORRO".equals(product.getProductName()));
     public static Product ProductResponse() {
         List<String> customerTypeTarget = new ArrayList<>();
         customerTypeTarget.add("PERSONAL");
