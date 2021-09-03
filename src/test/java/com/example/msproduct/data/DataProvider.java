@@ -23,4 +23,19 @@ public class DataProvider {
                         .build())
                 .build();
     }
+    public static Product ProductResponse() {
+        List<String> customerTypeTarget = new ArrayList<>();
+        customerTypeTarget.add("PERSONAL");
+        return Product.builder()
+                .id("1")
+                .productName("AHORRO")
+                .productType("PASIVO")
+                .rules(Rules.builder()
+                        .customerTypeTarget(customerTypeTarget)
+                        .maximumLimitMonthlyMovementsQuantity(1)
+                        .maximumLimitMonthlyMovements(true)
+                        .commissionMaintenance(false)
+                        .build())
+                .build();
+    }
 }
