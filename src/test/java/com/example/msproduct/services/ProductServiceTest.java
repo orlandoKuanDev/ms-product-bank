@@ -36,7 +36,7 @@ class ProductServiceTest {
                 .thenReturn(Mono.just(productRequest));
 
         Mono<Product> productName = mockProductService.findByProductName(productRequest.getProductName());
-        log.info("PRODUCT_NAME, {}", productName);
+
         StepVerifier.create(productName)
                 .expectNext(productRequest)
                 .verifyComplete();

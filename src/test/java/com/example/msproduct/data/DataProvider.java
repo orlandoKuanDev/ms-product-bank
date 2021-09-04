@@ -9,30 +9,38 @@ import java.util.function.Predicate;
 
 public class DataProvider {
     public static Product ProductRequest() {
-        List<String> customerTypeTarget = new ArrayList<>();
-        customerTypeTarget.add("PERSONAL");
         return Product.builder()
                 .id("1")
                 .productName("CUENTA CORRIENTE")
                 .productType("PASIVO")
                 .rules(Rules.builder()
-                        .customerTypeTarget(customerTypeTarget)
+                        .customerTypeTarget(customerTypeTarget("PERSONAL"))
                         .maximumLimitMonthlyMovementsQuantity(1)
                         .maximumLimitMonthlyMovements(false)
-                        .maximumLimitCreditPerson(1)
                         .commissionMaintenance(false)
                         .build())
                 .build();
     }
     public static Product ProductCreate() {
-        List<String> customerTypeTarget = new ArrayList<>();
-        customerTypeTarget.add("PERSONAL");
         return Product.builder()
                 .id("1")
                 .productName("CUENTA CORRIENTE")
                 .productType("PASIVO")
                 .rules(Rules.builder()
-                        .customerTypeTarget(customerTypeTarget)
+                        .customerTypeTarget(customerTypeTarget("PERSONAL"))
+                        .maximumLimitMonthlyMovementsQuantity(1)
+                        .maximumLimitMonthlyMovements(false)
+                        .commissionMaintenance(false)
+                        .build())
+                .build();
+    }
+    public static Product ProductUpdate() {
+        return Product.builder()
+                .id("1")
+                .productName("CUENTA CORRIENTE")
+                .productType("PASIVO")
+                .rules(Rules.builder()
+                        .customerTypeTarget(customerTypeTarget("ENTERPRISE"))
                         .maximumLimitMonthlyMovementsQuantity(1)
                         .maximumLimitMonthlyMovements(false)
                         .commissionMaintenance(false)
@@ -40,18 +48,21 @@ public class DataProvider {
                 .build();
     }
     public static Product ProductResponse() {
-        List<String> customerTypeTarget = new ArrayList<>();
-        customerTypeTarget.add("PERSONAL");
         return Product.builder()
-                .id("1")
+                .id("2")
                 .productName("AHORRO")
                 .productType("PASIVO")
                 .rules(Rules.builder()
-                        .customerTypeTarget(customerTypeTarget)
+                        .customerTypeTarget(customerTypeTarget("PERSONAL"))
                         .maximumLimitMonthlyMovementsQuantity(1)
                         .maximumLimitMonthlyMovements(true)
                         .commissionMaintenance(false)
                         .build())
                 .build();
+    }
+    public static List<String> customerTypeTarget(String type) {
+        List<String> customerTypeTarget = new ArrayList<>();
+        customerTypeTarget.add(type);
+        return customerTypeTarget;
     }
 }

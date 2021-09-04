@@ -24,14 +24,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 @Slf4j
@@ -39,13 +43,14 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = MsProductApplication.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ProductHandlerTest {
-    private static final String FIND_PRODUCT_NAME = "/product/name/{productName}";
+
     @Autowired
     RouterConfig routes;
-    private IProductRepository repository;
+    IProductRepository repository;
     ProductService mockProductService;
     ProductHandler mockProductHandler;
     WebTestClient webTestClient;
+
     @BeforeEach
     void setUp() {
         repository = Mockito.mock(IProductRepository.class);
@@ -56,13 +61,29 @@ class ProductHandlerTest {
                 .bindToRouterFunction(routes.rutas(mockProductHandler))
                 .build();
     }
-    private Predicate<Product> findByProducNamePred =
+    private final Predicate<Product> findByProductNamePred =
             product -> ("AHORRO".equals(product.getProductName()));
 
-    private Predicate<Product> findByProducIdPred =
-            product -> ("1".equals(product.getId()));
+    private final Predicate<Product> findByProductIdPred =
+            product -> ("2".equals(product.getId()));
+
+    private final Predicate<Product> updateProductPred =
+            product -> (product.equals(DataProvider.ProductUpdate()));
     @Test
     void whenFindAllProducts_thenCorrectProducts() {
+        Product product1 = DataProvider.ProductUpdate();
+        Product product2 = DataProvider.ProductResponse();
+
+        List<Product> products = Arrays.asList(
+                product2,
+                product1);
+
+        Mockito.when(mockProductService.findAll())
+                .thenReturn(Flux.just(product1, product2));
+
+        Flux<Product> productFlux = Flux.fromIterable(products);
+        given(mockProductService.findAll()).willReturn(productFlux);
+
         webTestClient
                 .get()
                 .uri("/product")
@@ -70,7 +91,8 @@ class ProductHandlerTest {
                 .expectStatus()
                 .isOk()
                 .expectBodyList(Product.class)
-                .hasSize(2);
+                .isEqualTo(products);
+                //.hasSize(2);
     }
 
     @Test
@@ -89,14 +111,14 @@ class ProductHandlerTest {
                 .returnResult(Product.class)
                 .getResponseBody()// it is a Flux<MyUser>
                 .as(StepVerifier::create)
-                .expectNextMatches(findByProducNamePred)
+                .expectNextMatches(findByProductNamePred)
                 .expectComplete()
                 .verify();
     }
 
     @Test
     void givenProductId_thenCorrectProduct() {
-        String productId = "1";
+        String productId = "2";
         Product productResponse = DataProvider.ProductResponse();
 
         Mockito.when(mockProductService.findById(productId))
@@ -104,13 +126,13 @@ class ProductHandlerTest {
 
         webTestClient
                 .method(HttpMethod.GET)
-                .uri("/product/" + productId)
+                .uri("/product/find/" + productId)
                 .exchange()
                 .expectStatus().isOk()
                 .returnResult(Product.class)
                 .getResponseBody()// it is a Flux<MyUser>
                 .as(StepVerifier::create)
-                .expectNextMatches(findByProducIdPred)
+                .expectNextMatches(findByProductIdPred)
                 .expectComplete()
                 .verify();
     }
@@ -119,7 +141,10 @@ class ProductHandlerTest {
     void whenCreateProduct_thenProductCreated() {
         Product productRequest = DataProvider.ProductRequest();
         Product productResponse = DataProvider.ProductCreate();
-        Mockito.when(mockProductService.create(productRequest)).thenReturn(Mono.just(productResponse));
+
+        Mockito.when(mockProductService.create(productRequest))
+                .thenReturn(Mono.just(productResponse));
+
         webTestClient
                 .method(HttpMethod.POST)
                 .uri("/product")
@@ -133,4 +158,44 @@ class ProductHandlerTest {
                 .jsonPath("$.id").isEqualTo(productResponse.getId());
     }
 
+    @Test
+    void whenUpdateProduct_thenProductUpdated() {
+        String productId = "1";
+        Product productRequest = DataProvider.ProductRequest();
+        productRequest.getRules().setCustomerTypeTarget(DataProvider.customerTypeTarget("ENTERPRISE"));
+        Product productResponse = DataProvider.ProductUpdate();
+
+        Mockito.when(mockProductService.update(productRequest))
+                .thenReturn(Mono.just(productResponse));
+
+        webTestClient
+                .method(HttpMethod.PUT)
+                .uri("/product/"+ productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequest)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .returnResult(Product.class)
+                .getResponseBody()// it is a Flux<MyUser>
+                .as(StepVerifier::create)
+                .expectNextMatches(updateProductPred)
+                .expectComplete()
+                .verify();
+    }
+    @Test
+    void whenDeleteProduct_thenProductDeleted() {
+        String productId = "1";
+        Product productRequest = DataProvider.ProductRequest();
+
+        Mockito.when(mockProductService.delete(productRequest.getId())).thenReturn(Mono.empty());
+
+        webTestClient
+                .delete()
+                .uri("/product/" + productId)
+                .exchange()
+                .expectStatus()
+                .isNoContent();
+    }
 }
