@@ -58,8 +58,11 @@ class ProductHandlerTest {
     }
     private Predicate<Product> findByProducNamePred =
             product -> ("AHORRO".equals(product.getProductName()));
+
+    private Predicate<Product> findByProducIdPred =
+            product -> ("1".equals(product.getId()));
     @Test
-    void findAll() {
+    void whenFindAllProducts_thenCorrectProducts() {
         webTestClient
                 .get()
                 .uri("/product")
@@ -67,11 +70,11 @@ class ProductHandlerTest {
                 .expectStatus()
                 .isOk()
                 .expectBodyList(Product.class)
-                .hasSize(10);
+                .hasSize(2);
     }
 
     @Test
-    void findByProductName() {
+    void givenProductName_thenCorrectProduct() {
         String productName = "AHORRO";
         Product productResponse = DataProvider.ProductResponse();
 
@@ -92,7 +95,28 @@ class ProductHandlerTest {
     }
 
     @Test
-    void save() {
+    void givenProductId_thenCorrectProduct() {
+        String productId = "1";
+        Product productResponse = DataProvider.ProductResponse();
+
+        Mockito.when(mockProductService.findById(productId))
+                .thenReturn(Mono.just(productResponse));
+
+        webTestClient
+                .method(HttpMethod.GET)
+                .uri("/product/" + productId)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(Product.class)
+                .getResponseBody()// it is a Flux<MyUser>
+                .as(StepVerifier::create)
+                .expectNextMatches(findByProducIdPred)
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void whenCreateProduct_thenProductCreated() {
         Product productRequest = DataProvider.ProductRequest();
         Product productResponse = DataProvider.ProductCreate();
         Mockito.when(mockProductService.create(productRequest)).thenReturn(Mono.just(productResponse));
@@ -108,4 +132,5 @@ class ProductHandlerTest {
                 .expectBody()
                 .jsonPath("$.id").isEqualTo(productResponse.getId());
     }
+
 }
